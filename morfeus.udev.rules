@@ -1,0 +1,9 @@
+# On Linux, save this file as /etc/udev/rules.d/morfeus.rules
+# and then force reload the udev rules by issuing
+# sudo udevadm control -R
+# this will allow morfeus access to non-root users, thus allowing
+# morfeus_tool to control morfeus without having to be run under sudo
+
+SUBSYSTEMS=="usb", ATTRS{idProduct}=="eac9" , ATTRS{idVendor}=="10c4", MODE="0666"
+
+
