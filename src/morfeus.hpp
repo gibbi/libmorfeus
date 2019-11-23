@@ -3,7 +3,12 @@
 
 #include <stdint.h>
 
-#include <fstream>
+#ifdef WIN32
+#include <windows.h>
+#endif
+#include <hidapi/hidapi.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 class MoRFeus {
  public:
@@ -15,7 +20,7 @@ class MoRFeus {
     SLEEP_60 = 0x02
   };
 
-  MoRFeus(std::string device, bool);
+  MoRFeus(bool);
   ~MoRFeus();
 
   uint32_t getFrequency_Hz();
@@ -37,8 +42,9 @@ class MoRFeus {
   Function function;
   LedSetting led;
 
-  std::fstream dev;
   uint8_t data[16];
+
+  hid_device* handle;
 };
 
 #endif

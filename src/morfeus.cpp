@@ -1,9 +1,6 @@
 #include "morfeus.hpp"
 
 #include <cstring>
-#include <fstream>
-#include <ios>
-#include <iostream>
 #include <stdexcept>
 
 enum MoRFeusFunction : uint8_t {
@@ -14,9 +11,12 @@ enum MoRFeusFunction : uint8_t {
   leds = 0x85
 };
 
-MoRFeus::MoRFeus(std::string device, bool fastInit)
-    : dev(device, std::ios::out | std::ios::in | std::ios::binary) {
-  if (not dev) {
+MoRFeus::MoRFeus(bool fastInit) {
+  if (hid_init()) throw(std::runtime_error("could not init hid"));
+
+  handle = hid_open(0x10c4, 0xeac9, NULL);
+
+  if (!handle) {
     throw(std::runtime_error("could not open device"));
   }
 
@@ -32,7 +32,10 @@ MoRFeus::MoRFeus(std::string device, bool fastInit)
   lock = false;
 }
 
-MoRFeus::~MoRFeus() { dev.close(); }
+MoRFeus::~MoRFeus() {
+  hid_close(handle);
+  hid_exit();
+}
 
 uint32_t MoRFeus::getFrequency_Hz() { return actualFrequency; }
 
@@ -92,6 +95,7 @@ void MoRFeus::setFunction(MoRFeus::Function f) {
 
 void MoRFeus::io() {
   data[0] = lock ? 0x72 : 0x77;
-  dev.write((char*)data, 16);
-  dev.read((char*)data, 16);
+
+  hid_write(handle, data, 16);
+  hid_read(handle, data, 16);
 }
